@@ -77,3 +77,14 @@ GROUP BY
     week_rownum
 ORDER BY
     week_rownum;
+
+
+
+SELECT
+    'SELECT cohort_week, ' ||
+    STRING_AGG('ROUND((CASE WHEN cohort_week = ''' || to_char(cohort_week, 'YYYY-MM-DD') ||
+               ''' THEN (retained_users * 100.0) / cohort_size END), 2) AS week_' || to_char(cohort_week, 'YYYY_MM_DD'), ', ') ||
+    ' FROM retention_data ORDER BY cohort_week;'
+FROM week_list;
+
+
