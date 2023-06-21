@@ -1,0 +1,27 @@
+-- Step 1: Generate a list of distinct weeks in the data
+WITH week_list AS (
+    SELECT DISTINCT DATE_TRUNC('week', registration_date) AS cohort_week
+    FROM users
+),
+
+-- Step 2: Calculate the retention percentage for each cohort week
+retention_data AS (
+    SELECT
+        DATE_TRUNC('week', registration_date) AS cohort_week,
+        COUNT(DISTINCT user_id) AS cohort_size,
+        COUNT(DISTINCT CASE WHEN retention_date <= DATE_TRUNC('week', registration_date) + INTERVAL '6 days' THEN user_id END) AS retained_users
+    FROM users
+    GROUP BY DATE_TRUNC('week', registration_date)
+),
+
+-- Step 3: Generate dynamic SQL to pivot the retention data
+pivot_query AS (
+    SELECT
+        'SELECT cohort_week, ' ||
+        string_agg('ROUND((SUM(CASE WHEN cohort_week = ''' || cohort_week || ''' THEN retained_users END) * 100.0) / MAX(cohort_size), 2) AS "' || cohort_week || '"', ', ') ||
+        ' FROM retention_data GROUP BY cohort_week ORDER BY cohort_week' AS sql_query
+    FROM week_list
+)
+
+-- Step 4: Execute the dynamic SQL query
+EXECUTE (SELECT sql_query FROM pivot_query);
