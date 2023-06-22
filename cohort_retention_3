@@ -74,3 +74,55 @@ PIVOT
 )
 ORDER BY
   cohort_date;
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  with new_user_activity as (
+  select activity.* from activity
+  join users on
+    users.id = activity.user_id
+    and users.date = activity.date
+), 
+
+cohort_active_user_count as (
+  select 
+    date, count(distinct user_id) as count 
+  from new_user_activity
+  
+  
+  
+  select date, 'Day '|| to_char(period, 'DD') as period,
+  new_users, retained_users, retention 
+from (
+  select 
+    new_user_activity.date as date,
+    (future_activity.date 
+      - new_user_activity.date) as period,
+    max(cohort_size.count) as new_users, -- all equal in group
+    count(distinct future_activity.user_id) as retained_users,
+    count(distinct future_activity.user_id) / 
+      max(cohort_size.count)::float as retention
+  from new_user_activity
+  left join activity as future_activity on
+    new_user_activity.user_id = future_activity.user_id
+    and new_user_activity.date < future_activity.date
+    and (new_user_activity.date + interval '10 days')
+      >= future_activity.date
+  left join cohort_active_user_count as cohort_size on 
+    new_user_activity.date = cohort_size.date 
+  group by 1, 2) t
+where period is not null
+order by date, period
+  group by 1
+)
+  
