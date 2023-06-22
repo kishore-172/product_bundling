@@ -1,0 +1,90 @@
+-- Step 1: Generate a list of distinct weeks in the data
+WITH week_list AS (
+  SELECT DISTINCT DATE_TRUNC('week', first_visit_date) AS cohort_week
+  FROM your_table
+),
+
+-- Step 2: Calculate the retention percentage for each week
+retention_data AS (
+  SELECT
+    DATE_TRUNC('week', first_visit_date) AS cohort_week,
+    COUNT(DISTINCT visitor_id) AS cohort_size,
+    ROUND(COUNT(DISTINCT CASE WHEN next_time_visit_dates <= DATE_TRUNC('week', first_visit_date) + INTERVAL '6 days' THEN visitor_id END) * 100.0 / COUNT(DISTINCT visitor_id), 2) AS retention_percentage
+  FROM your_table
+  GROUP BY DATE_TRUNC('week', first_visit_date)
+),
+
+-- Step 3: Generate the final pivot table
+pivot_data AS (
+  SELECT
+    cohort_week AS cohort_date,
+    retention_percentage,
+    CONCAT('week_', EXTRACT(WEEK FROM cohort_week)) AS week_column
+  FROM
+    retention_data
+)
+
+SELECT
+  cohort_date,
+  /* Generate the MAX(CASE WHEN ...) expression for each week */
+  /* Add more columns for additional weeks as needed */
+  /* Make sure to adjust the week_column values accordingly */
+  /* Example: MAX(CASE WHEN week_column = 'week_1' THEN retention_percentage END) AS week_1, */
+  MAX(CASE WHEN week_column = 'week_1' THEN retention_percentage END) AS week_1,
+  MAX(CASE WHEN week_column = 'week_2' THEN retention_percentage END) AS week_2,
+  MAX(CASE WHEN week_column = 'week_3' THEN retention_percentage END) AS week_3,
+  MAX(CASE WHEN week_column = 'week_4' THEN retention_percentage END) AS week_4,
+  MAX(CASE WHEN week_column = 'week_5' THEN retention_percentage END) AS week_5,
+  MAX(CASE WHEN week_column = 'week_7' THEN retention_percentage END) AS week_7,
+  MAX(CASE WHEN week_column = 'week_8' THEN retention_percentage END) AS week_8,
+  MAX(CASE WHEN week_column = 'week_9' THEN retention_percentage END) AS week_9,
+  MAX(CASE WHEN week_column = 'week_10' THEN retention_percentage END) AS week_10,
+  MAX(CASE WHEN week_column = 'week_11' THEN retention_percentage END) AS week_11,
+  MAX(CASE WHEN week_column = 'week_12' THEN retention_percentage END) AS week_12,
+  MAX(CASE WHEN week_column = 'week_13' THEN retention_percentage END) AS week_13,
+  MAX(CASE WHEN week_column = 'week_14' THEN retention_percentage END) AS week_14,
+  MAX(CASE WHEN week_column = 'week_15' THEN retention_percentage END) AS week_15,
+  MAX(CASE WHEN week_column = 'week_16' THEN retention_percentage END) AS week_16,
+  MAX(CASE WHEN week_column = 'week_17' THEN retention_percentage END) AS week_17,
+  MAX(CASE WHEN week_column = 'week_18' THEN retention_percentage END) AS week_18,
+  MAX(CASE WHEN week_column = 'week_19' THEN retention_percentage END) AS week_19,
+  MAX(CASE WHEN week_column = 'week_20' THEN retention_percentage END) AS week_20,
+  MAX(CASE WHEN week_column = 'week_21' THEN retention_percentage END) AS week_21,
+  MAX(CASE WHEN week_column = 'week_22' THEN retention_percentage END) AS week_22,
+  MAX(CASE WHEN week_column = 'week_23' THEN retention_percentage END) AS week_23,
+  MAX(CASE WHEN week_column = 'week_24' THEN retention_percentage END) AS week_24,
+  MAX(CASE WHEN week_column = 'week_25' THEN retention_percentage END) AS week_25,
+  MAX(CASE WHEN week_column = 'week_26' THEN retention_percentage END) AS week_26,
+  MAX(CASE WHEN week_column = 'week_27' THEN retention_percentage END) AS week_27,
+  MAX(CASE WHEN week_column = 'week_28' THEN retention_percentage END) AS week_28,
+  MAX(CASE WHEN week_column = 'week_29' THEN retention_percentage END) AS week_29,
+  MAX(CASE WHEN week_column = 'week_30' THEN retention_percentage END) AS week_30,
+  MAX(CASE WHEN week_column = 'week_31' THEN retention_percentage END) AS week_31,
+  MAX(CASE WHEN week_column = 'week_32' THEN retention_percentage END) AS week_32,
+  MAX(CASE WHEN week_column = 'week_33' THEN retention_percentage END) AS week_33,
+  MAX(CASE WHEN week_column = 'week_34' THEN retention_percentage END) AS week_34,
+  MAX(CASE WHEN week_column = 'week_35' THEN retention_percentage END) AS week_35,
+    MAX(CASE WHEN week_column = 'week_36' THEN retention_percentage END) AS week_36,
+  MAX(CASE WHEN week_column = 'week_37' THEN retention_percentage END) AS week_37,
+  MAX(CASE WHEN week_column = 'week_38' THEN retention_percentage END) AS week_38,
+  MAX(CASE WHEN week_column = 'week_39' THEN retention_percentage END) AS week_39,
+  MAX(CASE WHEN week_column = 'week_40' THEN retention_percentage END) AS week_40,
+  MAX(CASE WHEN week_column = 'week_41' THEN retention_percentage END) AS week_41,
+  MAX(CASE WHEN week_column = 'week_42' THEN retention_percentage END) AS week_42,
+  MAX(CASE WHEN week_column = 'week_43' THEN retention_percentage END) AS week_43,
+  MAX(CASE WHEN week_column = 'week_44' THEN retention_percentage END) AS week_44,
+  MAX(CASE WHEN week_column = 'week_45' THEN retention_percentage END) AS week_45,
+  MAX(CASE WHEN week_column = 'week_46' THEN retention_percentage END) AS week_46,
+  MAX(CASE WHEN week_column = 'week_47' THEN retention_percentage END) AS week_47,
+  MAX(CASE WHEN week_column = 'week_48' THEN retention_percentage END) AS week_48,
+  MAX(CASE WHEN week_column = 'week_49' THEN retention_percentage END) AS week_49,
+  MAX(CASE WHEN week_column = 'week_50' THEN retention_percentage END) AS week_50,
+  MAX(CASE WHEN week_column = 'week_51' THEN retention_percentage END) AS week_51,
+  MAX(CASE WHEN week_column = 'week_52' THEN retention_percentage END) AS week_52
+  
+FROM
+  pivot_data
+GROUP BY
+  cohort_date
+ORDER BY
+  cohort_date;
