@@ -134,4 +134,39 @@ GROUP BY
 ORDER BY
     week_rownum;
 
+-- Step 1: Determine the distinct weeks in the data
+WITH week_list AS (
+  SELECT DISTINCT DATE_TRUNC('week', first_visit_date) AS cohort_week
+  FROM your_table
+),
+
+-- Step 2: Calculate the cohort size for each week
+cohort_size_data AS (
+  SELECT
+    DATE_TRUNC('week', first_visit_date) AS cohort_week,
+    COUNT(DISTINCT visitor_id) AS cohort_size
+  FROM your_table
+  GROUP BY DATE_TRUNC('week', first_visit_date)
+),
+
+-- Step 3: Calculate the retention percentage for each week
+retention_data AS (
+  SELECT
+    DATE_TRUNC('week', first_visit_date) AS cohort_week,
+    COUNT(DISTINCT CASE WHEN next_time_visit_dates <= DATE_TRUNC('week', first_visit_date) + INTERVAL '6 days' THEN visitor_id END) AS retained_users
+  FROM your_table
+  GROUP BY DATE_TRUNC('week', first_visit_date)
+)
+
+-- Step 4: Generate the final pivot table
+SELECT
+  cohort_week,
+  ROUND((retained_users * 100.0) / cohort_size, 2) AS retention_percentage
+FROM
+  retention_data
+JOIN cohort_size_data USING (cohort_week)
+RIGHT JOIN week_list USING (cohort_week)
+ORDER BY cohort_week;
+
+
 
