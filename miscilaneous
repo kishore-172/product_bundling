@@ -1,3 +1,45 @@
+WITH cohort AS (
+  SELECT
+    start_time,
+    COUNT(DISTINCT CASE WHEN period_number = 0 THEN person_id END) AS week_0,
+    COUNT(DISTINCT CASE WHEN period_number = 1 THEN person_id END) AS week_1,
+    COUNT(DISTINCT CASE WHEN period_number = 2 THEN person_id END) AS week_2,
+    COUNT(DISTINCT CASE WHEN period_number = 3 THEN person_id END) AS week_3,
+    COUNT(DISTINCT CASE WHEN period_number = 4 THEN person_id END) AS week_4,
+    COUNT(DISTINCT CASE WHEN period_number = 5 THEN person_id END) AS week_5,
+    COUNT(DISTINCT CASE WHEN period_number = 6 THEN person_id END) AS week_6,
+    -- Repeat the pattern till week 52
+    -- ...
+    COUNT(DISTINCT CASE WHEN period_number = 52 THEN person_id END) AS week_52
+  FROM (
+    SELECT
+      person_id,
+      DATE_TRUNC('week', MIN(start)) AS start_time,
+      DATE_DIFF('week', MIN(start), DATE_TRUNC('week', start)) AS period_number
+    FROM histories
+    GROUP BY person_id, DATE_TRUNC('week', start)
+  ) AS cohort_data
+  GROUP BY start_time
+)
+
+SELECT
+  week_1 AS joined_week_1,
+  COUNT(DISTINCT CASE WHEN week_2 > 0 THEN person_id END) AS visited_week_2,
+  COUNT(DISTINCT CASE WHEN week_3 > 0 THEN person_id END) AS visited_week_3,
+  COUNT(DISTINCT CASE WHEN week_4 > 0 THEN person_id END) AS visited_week_4,
+  COUNT(DISTINCT CASE WHEN week_5 > 0 THEN person_id END) AS visited_week_5,
+  COUNT(DISTINCT CASE WHEN week_6 > 0 THEN person_id END) AS visited_week_6,
+  -- Repeat the columns for week 7 to week 52
+  -- ...
+  COUNT(DISTINCT CASE WHEN week_52 > 0 THEN person_id END) AS visited_week_52
+FROM cohort
+GROUP BY week_1
+ORDER BY week_1;
+
+
+
+
+
 
 SUM(CASE WHEN period_number = 0 THEN 1 ELSE 0 END) AS week0,
 SUM(CASE WHEN period_number = 1 THEN 1 ELSE 0 END) AS week1,
