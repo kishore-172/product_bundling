@@ -93,3 +93,100 @@ SUM(CASE WHEN period_number = 49 THEN 1 ELSE 0 END) AS week49,
 SUM(CASE WHEN period_number = 50 THEN 1 ELSE 0 END) AS week50,
 SUM(CASE WHEN period_number = 51 THEN 1 ELSE 0 END) AS week51,
 SUM(CASE WHEN period_number = 52 THEN 1 ELSE 0 END) AS week52
+
+
+
+
+
+
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Data Cleaning and Formatting
+df["yyyymmdd"] = pd.to_datetime(df["yyyymmdd"])
+
+# Summary Statistics
+traffic_stats = df["traffic"].describe()
+grouped_stats = df.groupby("hour")["traffic"].agg(["mean", "median", "std"])
+
+# Data Visualization
+# Line Plot
+plt.figure(figsize=(12, 6))
+sns.lineplot(x="yyyymmdd", y="traffic", data=df)
+plt.title("Traffic Trend over Time")
+plt.xlabel("Date")
+plt.ylabel("Traffic")
+plt.xticks(rotation=45)
+plt.show()
+
+# Histogram
+plt.figure(figsize=(8, 6))
+sns.histplot(data=df, x="traffic", bins=20)
+plt.title("Distribution of Traffic")
+plt.xlabel("Traffic")
+plt.ylabel("Count")
+plt.show()
+
+# Box Plot
+plt.figure(figsize=(8, 6))
+sns.boxplot(data=df, x="hour", y="traffic")
+plt.title("Traffic Distribution by Hour")
+plt.xlabel("Hour")
+plt.ylabel("Traffic")
+plt.show()
+
+# Heatmap
+hourly_traffic = df.pivot_table(index="hour", columns="yyyymmdd", values="traffic", aggfunc=np.mean)
+plt.figure(figsize=(12, 6))
+sns.heatmap(hourly_traffic, cmap="YlGnBu", linewidths=0.5)
+plt.title("Hourly Traffic Heatmap")
+plt.xlabel("Date")
+plt.ylabel("Hour")
+plt.xticks(rotation=45)
+plt.show()
+
+# Time-based Analysis
+# Example: Rolling Average
+df["rolling_avg"] = df.groupby("yyyymmdd")["traffic"].rolling(window=3, min_periods=1).mean()
+plt.figure(figsize=(12, 6))
+sns.lineplot(x="yyyymmdd", y="rolling_avg", data=df)
+plt.title("Rolling Average of Traffic")
+plt.xlabel("Date")
+plt.ylabel("Rolling Average")
+plt.xticks(rotation=45)
+plt.show()
+
+# Correlation Analysis
+correlation_matrix = df.corr()
+plt.figure(figsize=(8, 6))
+sns.heatmap(correlation_matrix, annot=True, cmap="YlGnBu")
+plt.title("Correlation Matrix")
+plt.show()
+
+# Outlier Detection
+Q1 = df.groupby("hour")["traffic"].transform(lambda x: x.quantile(0.25))
+Q3 = df.groupby("hour")["traffic"].transform(lambda x: x.quantile(0.75))
+IQR = Q3 - Q1
+lower_fence = Q1 - 1.5 * IQR
+upper_fence = Q3 + 1.5 * IQR
+outliers = df[(df["traffic"] < lower_fence) | (df["traffic"] > upper_fence)]
+
+plt.figure(figsize=(12, 6))
+sns.scatterplot(x="yyyymmdd", y="traffic", data=df, label="Data")
+sns.scatterplot(x="yyyymmdd", y="traffic", data=outliers, color="red", label="Outliers")
+plt.title("Traffic with Outliers")
+plt.xlabel("Date")
+plt.ylabel("Traffic")
+plt.xticks(rotation=45)
+plt.legend()
+plt.show()
+
+# Seasonality and Trends (Time Series Decomposition)
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+decomposition = seasonal_decompose(df.set_index("yyyymmdd")["traffic"], model="additive", period=24)
+
